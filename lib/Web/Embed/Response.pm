@@ -2,6 +2,7 @@ package Web::Embed::Response;
 use strict;
 use warnings;
 use 5.010;
+use utf8;
 
 our ($embeds);
 
@@ -50,11 +51,33 @@ sub render {
     if (my $oembed = $self->oembed) {
         return render_oembed($oembed);
     }
+
+    return $self->summary;
+}
+
+sub summary {
+    my $self = shift;
+    my $uri = $self->uri;
+    my $res = $self->http_response;
+    if ($res && $res->content_type =~ m(^image/)) {
+        return sprintf qq(<a href="%s" class="image"><img src="%s"></a>\n), $uri, $uri;
+    }
+
 }
 
 sub title {
     my $self = shift;
     $self->{_title} ||= do { $self->scraper->text('title') };
+}
+
+sub description {
+    my $self = shift;
+    $self->og->{description} || $self->dc->{description} || $self->metadata->{description};
+}
+
+sub image {
+    my $self = shift;
+    $self->og->{image}
 }
 
 sub metadata {
@@ -70,6 +93,11 @@ sub metadata {
 sub og {
     my $self = shift;
     $self->{_og} ||= $self->scraper->og;
+}
+
+sub dc {
+    my $self = shift;
+    $self->{_dc} ||= $self->scraper->dc;
 }
 
 sub scraper {

@@ -51,6 +51,19 @@ sub og {
     $og;
 }
 
+sub dc {
+    my $self = shift;
+    my $dc = {};
+    for my $rdf ($self->node('//rdf')) {
+        for my $attr_name ($rdf->all_attr_names) {
+            $attr_name or next;
+            $attr_name =~ m{^dc:(\w+)} or next;
+            $dc->{$1} = $rdf->attr($attr_name);
+        }
+    }
+    $dc;
+}
+
 sub tree {
     my $self = shift;
     $self->{_tree} ||= do {

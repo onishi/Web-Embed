@@ -1,5 +1,5 @@
 use t::Embed;
-use Test::More tests => 8;
+use Test::More tests => 9;
 use Web::Embed;
 
 my $guard = t::Embed::guard;
@@ -29,3 +29,7 @@ my $res = $api->embed('http://example.com');
     is $res->og->{image}, 'http://example.com/image.jpg';
 };
 
+# dc
+{
+    is $res->dc->{description}, 'dc-description';
+};
