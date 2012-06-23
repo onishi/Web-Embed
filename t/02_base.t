@@ -1,30 +1,13 @@
-use strict;
-use warnings;
+use t::Embed;
 use utf8;
 use Test::Base;
 use Web::Embed;
-use File::Slurp qw/read_file/;
-use FindBin;
 
 plan tests => 1 * blocks;
 
 filters {
     input    => [qw/chomp/],
     expected => [qw/chomp/],
-};
-
-no  warnings qw/redefine once/;
-local *LWP::UserAgent::get = sub {
-    my ($self, $url) = @_;
-    diag $url;
-    (my $file = $url) =~ s{[:/.\?&]+}{_}g;
-    $file = "$FindBin::Bin/stub/$file";
-    diag $file;
-    my $content = read_file($file) or die("no stub fo $url");
-    my $res = HTTP::Response->new(200);
-    $res->content_type('text/html/json'); # XXX
-    $res->content($content || '');
-    return $res;
 };
 
 my $embed = Web::Embed->new;

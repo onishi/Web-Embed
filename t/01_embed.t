@@ -1,6 +1,7 @@
-use strict;
-use warnings;
+use t::Embed;
 use Test::More tests => 1;
+use Web::Embed;
 
-ok 1;
+my $api = Web::Embed->new;
 
+ok $api;
