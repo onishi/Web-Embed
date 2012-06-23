@@ -73,3 +73,9 @@ http://www.nicovideo.jp/watch/sm15345209?top_flog
 http://live.nicovideo.jp/watch/lv95420643?ref=nicotop
 --- expected
 <script type="text/javascript" src="http://ext.nicovideo.jp/thumb_watch/lv95420643"></script>
+
+=== summary
+--- input
+http://example.com
+--- expected
+<div class="summary has-image"><a href="http://example.com" target="_blank" class="summary-image"><img src="http://example.com/image.jpg" alt=""/></a><a href="http://example.com" target="_blank" class="summary-title">title!</a><span class="summary-description">dc-description</span></div>
