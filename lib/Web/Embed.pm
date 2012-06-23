@@ -27,12 +27,20 @@ has cache => (
     }
 );
 
-use Web::oEmbed;
+use Web::Embed::Response;
 
 sub embed {
+    my ($self, $uri) = @_;
+    my $url = $self->request_url($uri);
+    my $res = $self->agent->get($url);
+    Web::Embed::Response->new_from_response($res, $uri);
 }
 
-
+sub request_url {
+    my ($self, $uri) = @_;
+    $uri =~ s{/#!/}{/}; # remove hash-bang
+    $uri;
+}
 
 1;
 
@@ -57,7 +65,6 @@ Web::Embed - convert URL to embedded HTML
 =head1 DESCRIPTION
 
 Web::Embed is a module that convert URL to embedded HTML
-
 
 =head1 AUTHOR
 
