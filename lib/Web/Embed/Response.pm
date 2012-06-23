@@ -8,6 +8,7 @@ our ($embeds);
 
 use Encode;
 use Encode::Guess;
+use HTML::ExtractContent;
 use HTML::ResolveLink;
 use Text::MicroTemplate;
 use URI::Escape qw/uri_unescape/;
