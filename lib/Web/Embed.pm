@@ -17,22 +17,21 @@ has agent => (
     }
 );
 
-has cache => (
-    is      => 'rw',
-    default => sub {
-        require Cache::MemoryCache;
-        Cache::MemoryCache->new({
-            namespace => __PACKAGE__ . "/" . $VERSION,
-        });
-    }
-);
+has cache => (is => 'rw');
+
+__PACKAGE__->meta->make_immutable;
+no Any::Moose;
 
 use Web::Embed::Response;
 
 sub embed {
     my ($self, $uri) = @_;
     $uri = $self->canonical_url($uri);
-    Web::Embed::Response->new_from_uri($uri);
+    Web::Embed::Response->new(
+        uri   => $uri,
+        agent => $self->agent,
+        cache => $self->cache,
+    );
 }
 
 # shortcut method
@@ -66,8 +65,8 @@ Web::Embed - convert URL to embedded HTML
 
   my $res = $api->embed($url);
 
-  $res->oembed; # Web::oEmbed::Response
-  $res->meta;   # meta elemnt information (hashref)
+  $res->oembed;   # Web::oEmbed::Response
+  $res->metadata; # meta elemnt information (hashref)
 
   print $res->render;
 

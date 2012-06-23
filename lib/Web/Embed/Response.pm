@@ -4,12 +4,16 @@ use warnings;
 
 our $providers;
 
-use Web::Embed::oEmbed;
+use Encode;
+use Encode::Guess;
 use HTML::ResolveLink;
+use Web::Embed::Scraper;
+use Web::Embed::oEmbed;
 
 use Any::Moose;
-has uri  => (is => 'ro');
-
+has uri   => (is => 'ro');
+has cache => (is => 'rw');
+has agent => (is => 'rw');
 has oembed_consumer => (
     is      => 'ro',
     isa     => 'Web::Embed::oEmbed',
@@ -17,8 +21,11 @@ has oembed_consumer => (
         my $consumer = Web::Embed::oEmbed->new;
         $consumer->register_provider($_) for @$providers;
         $consumer;
-    }
+    },
 );
+
+__PACKAGE__->meta->make_immutable;
+no Any::Moose;
 
 sub new_from_uri {
     my ($class, $uri) = @_;
@@ -33,9 +40,26 @@ sub render {
     }
 }
 
+sub metadata {
+    my $self = shift;
+    $self->{_metadata} ||= do {
+        {
+            description => $self->scraper->metas('description') || undef,
+            keywords    => $self->scraper->metas('keywords') || undef,
+        };
+    }
+}
+
+sub scraper {
+    my $self = shift;
+    $self->{_scraper} ||= do {
+        Web::Embed::Scraper->new( content => $self->content );
+    };
+}
+
 sub content {
-    my ($self, $uri) = @_;
-    my $res = $self->http_response($uri);
+    my $self = shift;
+    my $res = $self->http_response;
     $self->{_content} ||= do {
         my $content = $res->decoded_content;
         # content_type 見る
@@ -50,7 +74,7 @@ sub content {
             $content = Encode::decode($code, $content);
         }
         my $resolver = HTML::ResolveLink->new(
-            base => $uri,
+            base => $self->uri,
         );
         $content = $resolver->resolve($content);
         $content;
@@ -84,9 +108,10 @@ sub get_code {
 }
 
 sub http_response {
-    my ($self, $uri) = @_;
+    my $self = shift;
     $self->{_http_response} ||= do {
         my $res;
+        my $uri = $self->uri;
         if ($self->cache) {
             $res = $self->cache->get($uri);
         }
