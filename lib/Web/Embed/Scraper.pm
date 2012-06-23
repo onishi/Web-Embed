@@ -64,6 +64,17 @@ sub dc {
     $dc;
 }
 
+sub links {
+    my $self = shift;
+    my $links = {};
+    for my $link ($self->node('//link')) {
+        my $rel  = $link->attr('rel') or next;
+        my $href = $link->attr('href') or next;
+        $links->{$rel} = $href;
+    }
+    $links;
+}
+
 sub tree {
     my $self = shift;
     $self->{_tree} ||= do {

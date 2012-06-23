@@ -5,4 +5,5 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="http://example.com/">
 <meta property="og:image" content="http://example.com/image.jpg">
-<rdf:Description dc:description="dc-description" />
+<rdf:Description dc:description="dc-description">
+<link rel="image_src" href="http://example.com/image_src.jpg">

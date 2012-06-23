@@ -72,12 +72,12 @@ sub title {
 
 sub description {
     my $self = shift;
-    $self->og->{description} || $self->dc->{description} || $self->metadata->{description};
+    $self->og->{description} || $self->dc->{description} || $self->metadata->{description} || $self->extract_content;
 }
 
 sub image {
     my $self = shift;
-    $self->og->{image}
+    $self->og->{image} || $self->link->{image_src};
 }
 
 sub metadata {
@@ -100,11 +100,23 @@ sub dc {
     $self->{_dc} ||= $self->scraper->dc;
 }
 
+sub link {
+    my $self = shift;
+    $self->{_link} ||= $self->scraper->links;
+}
+
 sub scraper {
     my $self = shift;
     $self->{_scraper} ||= do {
         Web::Embed::Scraper->new( content => $self->content );
     };
+}
+
+sub extract_content {
+    my $self = shift;
+    my $text =  HTML::ExtractContent->new->extract($self->content)->as_text;
+    $text =~ s{<[^>]*>}{}g;
+    return $text;
 }
 
 sub content {
