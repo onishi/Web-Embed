@@ -40,6 +40,11 @@ sub render {
     }
 }
 
+sub title {
+    my $self = shift;
+    $self->{_title} ||= do { $self->scraper->text('title') };
+}
+
 sub metadata {
     my $self = shift;
     $self->{_metadata} ||= do {

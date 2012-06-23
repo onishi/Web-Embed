@@ -22,15 +22,15 @@ sub node {
     return wantarray ? @nodes : $nodes[0];
 }
 
-# sub text {
-#     my ($self, $selector) = @_;
-#     my $node = $self->node($selector) or return;
-#     $node->as_text;
-# }
+sub text {
+    my ($self, $selector) = @_;
+    my $node = $self->node($selector) or return;
+    $node->as_text;
+}
 
 sub metas {
     my ($self, $name) = @_;
-    for my $meta ($self->node('//meta')) {
+    for my $meta ($self->node('meta')) {
         $meta->attr('name') or next;
         $meta->attr('name') eq $name or next;
         return $meta->attr('content');

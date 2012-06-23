@@ -12,3 +12,5 @@ my $res = $api->embed('http://example.com');
 
 is $res->metadata->{description}, 'meta-description';
 is $res->metadata->{keywords}, 'hoge,fuga';
+
+is $res->title, 'title!';

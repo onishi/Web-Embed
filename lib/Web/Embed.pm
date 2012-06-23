@@ -66,6 +66,7 @@ Web::Embed - convert URL to embedded HTML
   my $res = $api->embed($url);
 
   $res->oembed;   # Web::oEmbed::Response
+  $res->title;    # page title
   $res->metadata; # meta elemnt information (hashref)
 
   print $res->render;
