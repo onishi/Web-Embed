@@ -31,12 +31,11 @@ use Web::Embed::Response;
 
 sub embed {
     my ($self, $uri) = @_;
-    my $url = $self->request_url($uri);
-    my $res = $self->agent->get($url);
-    Web::Embed::Response->new_from_response($res, $uri);
+    $uri = $self->canonical_url($uri);
+    Web::Embed::Response->new_from_uri($uri);
 }
 
-sub request_url {
+sub canonical_url {
     my ($self, $uri) = @_;
     $uri =~ s{/#!/}{/}; # remove hash-bang
     $uri;
