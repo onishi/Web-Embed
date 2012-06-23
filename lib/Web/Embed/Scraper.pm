@@ -75,6 +75,22 @@ sub links {
     $links;
 }
 
+sub image {
+    my $self = shift;
+    for my $id (
+        qw{
+            prodImage
+            main-image
+            fbPhotoImage
+        }
+    ) {
+        my $xpath = qq{id("$id")};
+        my $node = $self->node($xpath) or next;
+        ref($node) eq 'HTML::Element' or next;
+        return $node->attr('src');
+    }
+}
+
 sub tree {
     my $self = shift;
     $self->{_tree} ||= do {

@@ -38,3 +38,8 @@ my $res = $api->embed('http://example.com');
 {
     is $res->link->{image_src}, 'http://example.com/image_src.jpg';
 };
+
+# image ... 動かない
+# {
+#     is $res->scraper->image, 'http://example.com/main.jpg';
+# };

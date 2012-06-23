@@ -77,7 +77,7 @@ sub description {
 
 sub image {
     my $self = shift;
-    $self->og->{image} || $self->link->{image_src};
+    $self->og->{image} || $self->link->{image_src} || $self->microdata->{image} || $self->scraper->image;
 }
 
 sub metadata {
@@ -88,6 +88,11 @@ sub metadata {
             keywords    => $self->scraper->metas('keywords') || undef,
         };
     }
+}
+
+sub microdata {
+    # [TODO]: NOT IMPLEMENTED
+    {};
 }
 
 sub og {
