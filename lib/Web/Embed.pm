@@ -4,6 +4,8 @@ use warnings;
 
 our $VERSION = '0.01';
 
+use Web::Embed::Response;
+
 use Any::Moose;
 has agent => (
     is      => 'rw',
@@ -21,8 +23,6 @@ has cache => (is => 'rw');
 
 __PACKAGE__->meta->make_immutable;
 no Any::Moose;
-
-use Web::Embed::Response;
 
 sub embed {
     my ($self, $uri) = @_;

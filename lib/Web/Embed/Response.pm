@@ -1,12 +1,14 @@
 package Web::Embed::Response;
 use strict;
 use warnings;
+use 5.010;
 
-our $providers;
+our ($embeds);
 
 use Encode;
 use Encode::Guess;
 use HTML::ResolveLink;
+use Text::MicroTemplate;
 use Web::Embed::Scraper;
 use Web::Embed::oEmbed;
 
@@ -17,11 +19,7 @@ has agent => (is => 'rw');
 has oembed_consumer => (
     is      => 'ro',
     isa     => 'Web::Embed::oEmbed',
-    default => sub {
-        my $consumer = Web::Embed::oEmbed->new;
-        $consumer->register_provider($_) for @$providers;
-        $consumer;
-    },
+    default => sub { Web::Embed::oEmbed->new },
 );
 
 __PACKAGE__->meta->make_immutable;
@@ -35,8 +33,22 @@ sub new_from_uri {
 
 sub render {
     my $self = shift;
+
+    # 問い合わせ不要
+    for my $embed (@$embeds) {
+        if ($self->uri =~ $embed->{regexp}) {
+            if (ref $embed->{format} eq 'CODE') {
+                return $embed->{format}->(\%+);
+            } else {
+                my $sub = template($embed->{format}, [keys %+]);
+                return $sub->(\%+);
+            }
+        }
+    }
+
+    # oEmbed
     if (my $oembed = $self->oembed) {
-        render_oembed($oembed);
+        return render_oembed($oembed);
     }
 }
 
@@ -176,5 +188,67 @@ sub render_oembed {
         return $response->html;
     }
 }
+
+sub unindent ($) {
+    my $string = shift;
+    my ($indent) = ($string =~ /^\n?(\s*)/);
+    $string =~ s/^$indent//gm;
+    $string =~ s/\s+$//;
+    $string;
+}
+
+sub template ($$) {
+    my ($template, $keys) = @_;
+
+    my $mt = Text::MicroTemplate->new(
+        tag_start   => '{{',
+        tag_end     => '}}',
+        template    => unindent $template,
+        escape_func => undef,
+    );
+
+    my $code     = $mt->code;
+    my $expand   = join('; ', map { "my \$$_ = \$_[0]->{$_}" } @$keys);
+    my $renderer = eval << "    ..." or die $@;
+        sub {
+            $expand;
+            $code->();
+        }
+    ...
+}
+
+BEGIN {
+    $embeds = [
+        {
+            regexp => qr{^https?://gist.github.com/(?<id>\d+)}i,
+            format => q{<script src="https://gist.github.com/{{= $id }}.js"> </script>},
+        },
+        {
+            regexp => qr{^https?://(?:jp|www)[.]youtube[.]com/watch[?]v=(?<id>[\w\-]+)}i,
+            format => q{<iframe width="420" height="315" src="http://www.youtube.com/embed/{{= $id }}?wmode=transparent" frameborder="0" allowfullscreen></iframe>},
+        },
+        {
+            regexp => qr{^http://(?<domain>ugomemo[.]hatena[.]ne[.]jp|flipnote[.]hatena[.]com)/(?<did>[0-9A-Fa-f]{16})[@]DSi/movie/(?<file>[0-9A-Za-z_]{10,30})}i,
+            format => sub {
+                my ($domain, $did, $file) = map { $_[0]->{$_} } qw/domain did file/;
+                my $swf = {
+                    'ugomemo.hatena.ne.jp' => 'http://ugomemo.hatena.ne.jp/js/ugoplayer_s.swf',
+                    'flipnote.hatena.com' => 'http://flipnote.hatena.com/js/flipplayer_s.swf',
+                }->{$domain};
+                return sprintf(
+                    q{<object data="%s" type="application/x-shockwave-flash" width="279" height="240"><param name="movie" value="%s"></param><param name="FlashVars" value="did=%s&file=%s"></param></object>},
+                    $swf,
+                    $swf,
+                    $did,
+                    $file,
+                );
+            }
+        },
+        {
+            regexp => qr{^http://(?:www|live).nicovideo.jp/watch/(?<vid>\w+)}i,
+            format => q{<script type="text/javascript" src="http://ext.nicovideo.jp/thumb_watch/{{= $vid }}"></script>},
+        },
+    ];
+};
 
 1;
