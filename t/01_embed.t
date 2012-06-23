@@ -1,5 +1,5 @@
 use t::Embed;
-use Test::More tests => 3;
+use Test::More tests => 8;
 use Web::Embed;
 
 my $guard = t::Embed::guard;
@@ -10,7 +10,22 @@ ok $api;
 
 my $res = $api->embed('http://example.com');
 
-is $res->metadata->{description}, 'meta-description';
-is $res->metadata->{keywords}, 'hoge,fuga';
+# meta
+{
+    is $res->metadata->{description}, 'meta-description';
+    is $res->metadata->{keywords}, 'hoge,fuga';
+};
 
-is $res->title, 'title!';
+# title
+{
+    is $res->title, 'title!';
+};
+
+# og
+{
+    is $res->og->{title}, 'og-title';
+    is $res->og->{type},  'article';
+    is $res->og->{url},   'http://example.com/';
+    is $res->og->{image}, 'http://example.com/image.jpg';
+};
+

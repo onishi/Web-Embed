@@ -37,6 +37,20 @@ sub metas {
     }
 }
 
+sub og {
+    my $self = shift;
+    my $og = {};
+    for my $meta ($self->node('meta')) {
+        for my $attr_name (qw/name property/) {
+            my $attr = $meta->attr($attr_name) || '';
+            if ($attr =~ m{^og:(\w+)}) {
+                $og->{$1} = $meta->attr('content');
+            }
+        }
+    }
+    $og;
+}
+
 sub tree {
     my $self = shift;
     $self->{_tree} ||= do {

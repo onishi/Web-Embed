@@ -55,6 +55,11 @@ sub metadata {
     }
 }
 
+sub og {
+    my $self = shift;
+    $self->{_og} ||= $self->scraper->og;
+}
+
 sub scraper {
     my $self = shift;
     $self->{_scraper} ||= do {

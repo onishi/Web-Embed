@@ -1,3 +1,7 @@
+<title>title!</title>
 <meta name="description" content="meta-description">
 <meta name="keywords" content="hoge,fuga">
-<title>title!</title>
+<meta property="og:title" content="og-title">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://example.com/">
+<meta property="og:image" content="http://example.com/image.jpg">
