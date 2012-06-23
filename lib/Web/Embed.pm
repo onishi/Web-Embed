@@ -2,7 +2,7 @@ package Web::Embed;
 use strict;
 use warnings;
 
-our $VERSION => '0.01';
+our $VERSION = '0.01';
 
 use Any::Moose;
 has agent => (
@@ -33,6 +33,12 @@ sub embed {
     my ($self, $uri) = @_;
     $uri = $self->canonical_url($uri);
     Web::Embed::Response->new_from_uri($uri);
+}
+
+# shortcut method
+sub render {
+    my ($self, $uri) = @_;
+    $self->embed($uri)->render;
 }
 
 sub canonical_url {
