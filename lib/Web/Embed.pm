@@ -4,9 +4,9 @@ use warnings;
 
 our $VERSION = '0.01';
 
-use Web::Embed::Response;
-
 use Any::Moose;
+use Module::Load;
+
 has agent => (
     is      => 'rw',
     isa     => 'LWP::UserAgent',
@@ -21,13 +21,22 @@ has agent => (
 
 has cache => (is => 'rw');
 
+has response_class => (
+    is  => 'rw',
+    isa => 'Str',
+    default => 'Web::Embed::Response',
+);
+
 __PACKAGE__->meta->make_immutable;
 no Any::Moose;
 
 sub embed {
     my ($self, $uri) = @_;
     $uri = $self->canonical_url($uri);
-    Web::Embed::Response->new(
+
+    load $self->response_class;
+
+    $self->response_class->new(
         uri   => $uri,
         agent => $self->agent,
         cache => $self->cache,
