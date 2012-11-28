@@ -9,6 +9,7 @@ requires 'HTML::Selector::XPath';
 requires 'HTML::TreeBuilder::XPath';
 requires 'LWP::UserAgent';
 requires 'Web::oEmbed';
+requires 'Module::Load';
 
 tests 't/*.t';
 author_tests 'xt';

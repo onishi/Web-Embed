@@ -144,6 +144,7 @@ sub extract_content {
 sub content {
     my $self = shift;
     my $res = $self->http_response;
+    return undef if $res->is_error;
     $self->{_content} ||= do {
         my $content = $res->decoded_content;
         # content_type 見る

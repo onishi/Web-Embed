@@ -43,7 +43,7 @@ sub og {
     for my $meta ($self->node('meta')) {
         for my $attr_name (qw/name property/) {
             my $attr = $meta->attr($attr_name) || '';
-            if ($attr =~ m{^og:(\w+)}) {
+            if ($attr =~ m{^og:(.+)$}) {
                 $og->{$1} = $meta->attr('content');
             }
         }
