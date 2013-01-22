@@ -2,8 +2,6 @@ use t::Embed;
 use Test::More tests => 10;
 use Web::Embed;
 
-my $guard = t::Embed::guard;
-
 my $api = Web::Embed->new;
 
 ok $api;

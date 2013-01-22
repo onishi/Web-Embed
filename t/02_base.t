@@ -1,5 +1,4 @@
 use t::Embed;
-use utf8;
 use Test::Base;
 use Web::Embed;
 
@@ -30,7 +29,7 @@ https://twitter.com/kentaro/status/13430016778
 --- input
 http://www.flickr.com/photos/btaphoto/42185736/in/photostream
 --- expected
-<a href="http://www.flickr.com/photos/btaphoto/42185736/" title="DSC_0852"><img alt="DSC_0852" src="src" /></a>
+<div class="summary no-image"><a href="http://www.flickr.com/photos/btaphoto/42185736/in/photostream" target="_blank" class="summary-title">http://www.flickr.com/photos/btaphoto/42185736/in/photostream</a></div>
 
 === gist http
 --- input
