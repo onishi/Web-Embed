@@ -77,4 +77,4 @@ http://live.nicovideo.jp/watch/lv95420643?ref=nicotop
 --- input
 http://example.com
 --- expected
-<div class="summary has-image"><a href="http://example.com" target="_blank" class="summary-image"><img src="http://example.com/image.jpg" alt=""/></a><a href="http://example.com" target="_blank" class="summary-title">title!</a><span class="summary-description">dc-description</span></div>
+<div class="summary has-image"><a href="http://example.com" target="_blank" class="summary-image"><img src="http://example.com/image.jpg" alt=""/></a><a href="http://example.com" target="_blank" class="summary-title">title!&lt;marquee&gt;</a><span class="summary-description">dc-description&lt;blink&gt;</span></div>

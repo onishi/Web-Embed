@@ -1,13 +1,13 @@
 <html>
 <head>
-<title>title!</title>
+<title>title!&lt;marquee&gt;</title>
 <meta name="description" content="meta-description">
 <meta name="keywords" content="hoge,fuga">
 <meta property="og:title" content="og-title">
 <meta property="og:type" content="article">
 <meta property="og:url" content="http://example.com/">
 <meta property="og:image" content="http://example.com/image.jpg">
-<rdf:Description dc:description="dc-description">
+<rdf:Description dc:description="dc-description&lt;blink&gt;">
 <link rel="image_src" href="http://example.com/image_src.jpg">
 </head>
 <body>

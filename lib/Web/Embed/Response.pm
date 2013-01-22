@@ -10,6 +10,7 @@ use Encode;
 use Encode::Guess;
 use HTML::ExtractContent;
 use HTML::ResolveLink;
+use HTML::Escape;
 use Text::MicroTemplate;
 use URI::Escape qw/uri_unescape/;
 use Web::Embed::Scraper;
@@ -64,7 +65,8 @@ sub summary {
 
     # content_type が image だったら img タグにする
     if ($res && $res->content_type =~ m(^image/)) {
-        return sprintf qq(<a href="%s" class="image"><img src="%s"></a>\n), $uri, $uri;
+        return sprintf qq(<a href="%s" class="image"><img src="%s"></a>\n),
+            escape_html($uri), escape_html($uri);
     }
 
     my $title       = $self->title;
@@ -73,11 +75,13 @@ sub summary {
 
     my $ret;
     if ($image) {
-        $ret .= sprintf qq{<a href="%s" target="_blank" class="summary-image"><img src="%s" alt=""/></a>}, $uri, $image;
+        $ret .= sprintf qq{<a href="%s" target="_blank" class="summary-image"><img src="%s" alt=""/></a>},
+            escape_html($uri), escape_html($image);
     }
-    $ret .= sprintf qq{<a href="%s" target="_blank" class="summary-title">%s</a>}, $uri, $title || uri_unescape($uri);
+    $ret .= sprintf qq{<a href="%s" target="_blank" class="summary-title">%s</a>},
+            escape_html($uri), escape_html($title || uri_unescape($uri));
     if ($description) {
-        $ret .= sprintf qq{<span class="summary-description">%s</span>}, $description;
+        $ret .= sprintf qq{<span class="summary-description">%s</span>}, escape_html($description);
     }
     return sprintf '<div class="summary %s">%s</div>', ($image ? 'has-image' : 'no-image'), $ret;
 }

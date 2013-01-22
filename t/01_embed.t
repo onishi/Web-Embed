@@ -2,9 +2,7 @@ use t::Embed;
 use Test::More tests => 10;
 use Web::Embed;
 
-my $api = Web::Embed->new;
-
-ok $api;
+my $api = new_ok 'Web::Embed';
 
 my $res = $api->embed('http://example.com');
 
@@ -16,7 +14,7 @@ my $res = $api->embed('http://example.com');
 
 # title
 {
-    is $res->title, 'title!';
+    is $res->title, 'title!<marquee>';
 };
 
 # og
@@ -29,7 +27,7 @@ my $res = $api->embed('http://example.com');
 
 # dc
 {
-    is $res->dc->{description}, 'dc-description';
+    is $res->dc->{description}, 'dc-description<blink>';
 };
 
 # link
