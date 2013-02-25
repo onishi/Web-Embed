@@ -293,11 +293,11 @@ sub template ($$) {
 BEGIN {
     $embeds = [
         {
-            regexp => qr{^https?://gist.github.com/(?<id>\d+)}i,
+            regexp => qr{^https?://gist[.]github[.]com/(?<id>\d+)}i,
             format => q{<script src="https://gist.github.com/{{= $id }}.js"> </script>},
         },
         {
-            regexp => qr{^https?://(?:jp|www)[.]youtube[.]com/watch[?]v=(?<id>[\w\-]+)}i,
+            regexp => qr{^(?:https?://(?:jp|www)[.]youtube[.]com/watch[?]v=(?<id>[\w\-]+)|http://youtu[.]be/(?<id>[\w\-]+))}i,
             format => q{<iframe width="420" height="315" src="http://www.youtube.com/embed/{{= $id }}?wmode=transparent" frameborder="0" allowfullscreen></iframe>},
         },
         {

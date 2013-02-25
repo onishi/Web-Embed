@@ -49,6 +49,12 @@ http://www.youtube.com/watch?v=-o58YST68QA
 --- expected
 <iframe width="420" height="315" src="http://www.youtube.com/embed/-o58YST68QA?wmode=transparent" frameborder="0" allowfullscreen></iframe>
 
+=== youtube
+--- input
+http://youtu.be/oWTgvRGwzWg
+--- expected
+<iframe width="420" height="315" src="http://www.youtube.com/embed/oWTgvRGwzWg?wmode=transparent" frameborder="0" allowfullscreen></iframe>
+
 === ugomemo
 --- input
 http://ugomemo.hatena.ne.jp/0265A0404CDEDD58@DSi/movie/DEDD58_08ACA9E0E6FD8_000?in=user
