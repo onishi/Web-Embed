@@ -4,6 +4,7 @@ all_from 'lib/Web/Embed.pm';
 
 requires 'Any::Moose';
 requires 'Encode';
+requires 'HTML::Escape';
 requires 'HTML::ResolveLink';
 requires 'HTML::Selector::XPath';
 requires 'HTML::TreeBuilder::XPath';
