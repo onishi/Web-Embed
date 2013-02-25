@@ -10,6 +10,7 @@ use Encode;
 use Encode::Guess;
 use HTML::ExtractContent;
 use HTML::ResolveLink;
+use HTML::Escape;
 use Text::MicroTemplate;
 use URI::Escape qw/uri_unescape/;
 use Web::Embed::Scraper;
@@ -24,6 +25,16 @@ has oembed_consumer => (
     isa     => 'Web::Embed::oEmbed',
     default => sub { Web::Embed::oEmbed->new },
 );
+
+has title         => ( is => 'ro', lazy_build => 1 );
+has metadata      => ( is => 'ro', lazy_build => 1 );
+has og            => ( is => 'ro', lazy_build => 1 );
+has dc            => ( is => 'ro', lazy_build => 1 );
+has link          => ( is => 'ro', lazy_build => 1 );
+has scraper       => ( is => 'ro', lazy_build => 1 );
+has content       => ( is => 'ro', lazy_build => 1 );
+has http_response => ( is => 'ro', lazy_build => 1 );
+has oembed        => ( is => 'ro', lazy_build => 1 );
 
 __PACKAGE__->meta->make_immutable;
 no Any::Moose;
@@ -64,7 +75,8 @@ sub summary {
 
     # content_type が image だったら img タグにする
     if ($res && $res->content_type =~ m(^image/)) {
-        return sprintf qq(<a href="%s" class="image"><img src="%s"></a>\n), $uri, $uri;
+        return sprintf qq(<a href="%s" class="image"><img src="%s"></a>\n),
+            escape_html($uri), escape_html($uri);
     }
 
     my $title       = $self->title;
@@ -73,18 +85,20 @@ sub summary {
 
     my $ret;
     if ($image) {
-        $ret .= sprintf qq{<a href="%s" target="_blank" class="summary-image"><img src="%s" alt=""/></a>}, $uri, $image;
+        $ret .= sprintf qq{<a href="%s" target="_blank" class="summary-image"><img src="%s" alt=""/></a>},
+            escape_html($uri), escape_html($image);
     }
-    $ret .= sprintf qq{<a href="%s" target="_blank" class="summary-title">%s</a>}, $uri, $title || uri_unescape($uri);
+    $ret .= sprintf qq{<a href="%s" target="_blank" class="summary-title">%s</a>},
+            escape_html($uri), escape_html($title || uri_unescape($uri));
     if ($description) {
-        $ret .= sprintf qq{<span class="summary-description">%s</span>}, $description;
+        $ret .= sprintf qq{<span class="summary-description">%s</span>}, escape_html($description);
     }
     return sprintf '<div class="summary %s">%s</div>', ($image ? 'has-image' : 'no-image'), $ret;
 }
 
-sub title {
+sub _build_title {
     my $self = shift;
-    $self->{_title} ||= do { $self->scraper->text('title') };
+    return $self->scraper->text('title');
 }
 
 sub description {
@@ -97,14 +111,12 @@ sub image {
     $self->og->{image} || $self->link->{image_src} || $self->microdata->{image} || $self->scraper->image;
 }
 
-sub metadata {
+sub _build_metadata {
     my $self = shift;
-    $self->{_metadata} ||= do {
-        {
-            description => $self->scraper->metas('description') || undef,
-            keywords    => $self->scraper->metas('keywords') || undef,
-        };
-    }
+    return {
+        description => $self->scraper->metas('description') || undef,
+        keywords    => $self->scraper->metas('keywords') || undef,
+    };
 }
 
 sub microdata {
@@ -112,26 +124,24 @@ sub microdata {
     {};
 }
 
-sub og {
+sub _build_og {
     my $self = shift;
-    $self->{_og} ||= $self->scraper->og;
+    return $self->scraper->og;
 }
 
-sub dc {
+sub _build_dc {
     my $self = shift;
-    $self->{_dc} ||= $self->scraper->dc;
+    return $self->scraper->dc;
 }
 
-sub link {
+sub _build_link {
     my $self = shift;
-    $self->{_link} ||= $self->scraper->links;
+    return $self->scraper->links;
 }
 
-sub scraper {
+sub _build_scraper {
     my $self = shift;
-    $self->{_scraper} ||= do {
-        Web::Embed::Scraper->new( content => $self->content );
-    };
+    return Web::Embed::Scraper->new( content => $self->content );
 }
 
 sub extract_content {
@@ -141,29 +151,30 @@ sub extract_content {
     return $text;
 }
 
-sub content {
+sub _build_content {
     my $self = shift;
     my $res = $self->http_response;
-    return undef if $res->is_error;
-    $self->{_content} ||= do {
-        my $content = $res->decoded_content;
-        # content_type 見る
-        $content = $res->content_type =~ m/text|html|xml/i ? $content : '';
 
-        # content_type が嘘でバイナリ含んでても空に
-        if ($content && $content =~ /([\x00-\x06\x7f\xff])/) {
-            $content = '';
-        }
-        my $code = $self->get_code($content);
-        if ($code && !Encode::is_utf8($content)) {
-            $content = Encode::decode($code, $content);
-        }
-        my $resolver = HTML::ResolveLink->new(
-            base => $self->uri,
-        );
-        $content = $resolver->resolve($content);
-        $content;
+    return undef if $res->is_error;
+
+    my $content = $res->decoded_content;
+    # content_type 見る
+    $content = $res->content_type =~ m/text|html|xml/i ? $content : '';
+
+    # content_type が嘘でバイナリ含んでても空に
+    if ($content && $content =~ /([\x00-\x06\x7f\xff])/) {
+        $content = '';
     }
+    my $code = $self->get_code($content);
+    if ($code && !Encode::is_utf8($content)) {
+        $content = Encode::decode($code, $content);
+    }
+    my $resolver = HTML::ResolveLink->new(
+        base => $self->uri,
+    );
+    $content = $resolver->resolve($content);
+
+    return $content;
 }
 
 sub get_code {
@@ -192,30 +203,29 @@ sub get_code {
     return $code || 'utf-8';
 }
 
-sub http_response {
+sub _build_http_response {
     my $self = shift;
-    $self->{_http_response} ||= do {
-        my $res;
-        my $uri = $self->uri;
-        if ($self->cache) {
-            $res = $self->cache->get($uri);
-        }
-        unless ($res) {
-            for (1..3) { # retry
-                $res = $self->agent->get($uri);
-                $res->is_success and last;
-            }
-            if ($self->cache && $res->is_success) {
-                $self->cache->set($uri, $res);
-            }
-        }
-        $res;
+
+    my $res;
+    my $uri = $self->uri;
+    if ($self->cache) {
+        $res = $self->cache->get($uri);
     }
+    unless ($res) {
+        for (1..3) { # retry
+            $res = $self->agent->get($uri);
+            $res->is_success and last;
+        }
+        if ($self->cache && $res->is_success) {
+            $self->cache->set($uri, $res);
+        }
+    }
+    return $res;
 }
 
-sub oembed {
+sub _build_oembed {
     my $self = shift;
-    $self->{_oembed} ||= eval {
+    return eval {
         $self->oembed_consumer->embed($self->uri);
     };
 }
@@ -283,11 +293,11 @@ sub template ($$) {
 BEGIN {
     $embeds = [
         {
-            regexp => qr{^https?://gist.github.com/(?<id>\d+)}i,
+            regexp => qr{^https?://gist[.]github[.]com/(?<id>\d+)}i,
             format => q{<script src="https://gist.github.com/{{= $id }}.js"> </script>},
         },
         {
-            regexp => qr{^https?://(?:jp|www)[.]youtube[.]com/watch[?]v=(?<id>[\w\-]+)}i,
+            regexp => qr{^(?:https?://(?:jp|www)[.]youtube[.]com/watch[?]v=(?<id>[\w\-]+)|http://youtu[.]be/(?<id>[\w\-]+))}i,
             format => q{<iframe width="420" height="315" src="http://www.youtube.com/embed/{{= $id }}?wmode=transparent" frameborder="0" allowfullscreen></iframe>},
         },
         {

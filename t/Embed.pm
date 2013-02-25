@@ -1,26 +1,34 @@
 package t::Embed;
 use strict;
 use warnings;
-use Test::More;
 use utf8;
+use Test::More;
 use File::Slurp qw/read_file/;
 use FindBin;
+use LWP::Protocol::PSGI;
+use Plack::Request;
 
-no warnings qw/redefine once/;
-*LWP::UserAgent::get = sub {
-    my ($self, $url) = @_;
-    diag $url;
-    (my $file = $url) =~ s{[:/.\?&]+}{_}g;
-    $file = "$FindBin::Bin/stub/$file";
-    diag $file;
-    my $content = read_file($file) or die("no stub fo $url");
+sub import {
+    strict->import;
+    warnings->import;
+    utf8->import;
 
-    #warn $content;
+    LWP::Protocol::PSGI->register(sub {
+        my $env = shift;
+        my $req = Plack::Request->new($env);
+        my $file = $req->uri;
+           $file =~ s<[::/.\?&]+><_>g;
+           $file =~ s<_+$><>;
 
-    my $res = HTTP::Response->new(200);
-    $res->content_type('text/html/json'); # XXX
-    $res->content($content || '');
-    return $res;
-};
+        my $content = read_file("t/stub/$file") or die 'no stub for ' . $req->uri;
+        return [
+            200,
+            [ 'Content-Type' => $req->uri->path =~ /\.json$/ ? 'application/json' : 'text/html' ],
+            [ $content ]
+        ];
+    });
+
+    undef;
+}
 
 1;

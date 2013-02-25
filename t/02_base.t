@@ -1,5 +1,4 @@
 use t::Embed;
-use utf8;
 use Test::Base;
 use Web::Embed;
 
@@ -30,7 +29,7 @@ https://twitter.com/kentaro/status/13430016778
 --- input
 http://www.flickr.com/photos/btaphoto/42185736/in/photostream
 --- expected
-<a href="http://www.flickr.com/photos/btaphoto/42185736/" title="DSC_0852"><img alt="DSC_0852" src="src" /></a>
+<div class="summary no-image"><a href="http://www.flickr.com/photos/btaphoto/42185736/in/photostream" target="_blank" class="summary-title">http://www.flickr.com/photos/btaphoto/42185736/in/photostream</a></div>
 
 === gist http
 --- input
@@ -49,6 +48,12 @@ https://gist.github.com/1156287
 http://www.youtube.com/watch?v=-o58YST68QA
 --- expected
 <iframe width="420" height="315" src="http://www.youtube.com/embed/-o58YST68QA?wmode=transparent" frameborder="0" allowfullscreen></iframe>
+
+=== youtube
+--- input
+http://youtu.be/oWTgvRGwzWg
+--- expected
+<iframe width="420" height="315" src="http://www.youtube.com/embed/oWTgvRGwzWg?wmode=transparent" frameborder="0" allowfullscreen></iframe>
 
 === ugomemo
 --- input
@@ -78,4 +83,4 @@ http://live.nicovideo.jp/watch/lv95420643?ref=nicotop
 --- input
 http://example.com
 --- expected
-<div class="summary has-image"><a href="http://example.com" target="_blank" class="summary-image"><img src="http://example.com/image.jpg" alt=""/></a><a href="http://example.com" target="_blank" class="summary-title">title!</a><span class="summary-description">dc-description</span></div>
+<div class="summary has-image"><a href="http://example.com" target="_blank" class="summary-image"><img src="http://example.com/image.jpg" alt=""/></a><a href="http://example.com" target="_blank" class="summary-title">title!&lt;marquee&gt;</a><span class="summary-description">dc-description&lt;blink&gt;</span></div>
